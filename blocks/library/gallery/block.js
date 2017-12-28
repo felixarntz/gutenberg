@@ -38,6 +38,7 @@ class GalleryBlock extends Component {
 	constructor() {
 		super( ...arguments );
 
+		this.onFocusImageCaption = this.onFocusImageCaption.bind( this );
 		this.onSelectImage = this.onSelectImage.bind( this );
 		this.onSelectImages = this.onSelectImages.bind( this );
 		this.setLinkTo = this.setLinkTo.bind( this );
@@ -55,10 +56,24 @@ class GalleryBlock extends Component {
 	}
 
 	onSelectImage( index ) {
-		return () => {
+		return ( event ) => {
+			// ignore clicks in the editable caption.
+			// Without this logic, text operations like selection, select / unselects the images.
+			if ( event.target.tagName === 'FIGCAPTION' ) {
+				return;
+			}
 			this.setState( ( state ) => ( {
 				selectedImage: index === state.selectedImage ? null : index,
 			} ) );
+		};
+	}
+
+	onFocusImageCaption( index ) {
+		return ( focusValue ) => {
+			this.setState( {
+				selectedImage: index,
+			} );
+			this.props.setFocus( { editableIndex: index, ...focusValue } );
 		};
 	}
 
@@ -74,7 +89,8 @@ class GalleryBlock extends Component {
 	}
 
 	onSelectImages( imgs ) {
-		this.props.setAttributes( { images: imgs } );
+		const images = imgs.map( img => img.caption ? { ...img, caption: [ img.caption ] } : img );
+		this.props.setAttributes( { images } );
 	}
 
 	setLinkTo( value ) {
@@ -247,6 +263,10 @@ class GalleryBlock extends Component {
 						onRemove={ this.onRemoveImage( index ) }
 						onClick={ this.onSelectImage( index ) }
 						setAttributes={ ( attrs ) => this.setImageAttributes( index, attrs ) }
+						caption={ img.caption }
+						focus={ focus }
+						onFocus={ this.onFocusImageCaption( index ) }
+						imageIndex={ index }
 					/>
 				) ) }
 			</div>,
