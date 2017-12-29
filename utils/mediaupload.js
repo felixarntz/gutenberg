@@ -9,7 +9,11 @@
 	TODO: future enhancement to add an upload indicator
 */
 
-export function mediaUpload( filesList, setAttributes, gallery = false ) {
+export function mediaUpload( {
+	filesList,
+	setAttributes,
+	gallery = false,
+} ) {
 	// Cast filesList to array
 	const files = [ ...filesList ];
 

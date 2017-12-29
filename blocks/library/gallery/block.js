@@ -95,7 +95,11 @@ class GalleryBlock extends Component {
 	}
 
 	uploadFromFiles( event ) {
-		mediaUpload( event.target.files, this.props.setAttributes, isGallery );
+		mediaUpload( {
+			filesList: event.target.files,
+			setAttributes: this.props.setAttributes,
+			gallery: isGallery,
+		} );
 	}
 
 	setImageAttributes( index, attributes ) {
@@ -116,15 +120,15 @@ class GalleryBlock extends Component {
 	dropFiles( files ) {
 		const currentImages = this.props.attributes.images || [];
 		const { setAttributes } = this.props;
-		mediaUpload(
-			files,
-			( { images } ) => {
+		mediaUpload( {
+			filesList: files,
+			setAttributes: ( { images } ) => {
 				setAttributes( {
 					images: currentImages.concat( images ),
 				} );
 			},
-			isGallery
-		);
+			gallery: isGallery,
+		} );
 	}
 
 	componentWillReceiveProps( nextProps ) {

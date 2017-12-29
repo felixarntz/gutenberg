@@ -118,8 +118,8 @@ class ImageBlock extends Component {
 		const figureStyle = width ? { width } : {};
 		const isResizable = [ 'wide', 'full' ].indexOf( align ) === -1 && ( ! viewPort.isExtraSmall() );
 		const uploadButtonProps = { isLarge: true };
-		const uploadFromFiles = ( event ) => mediaUpload( event.target.files, setAttributes );
-		const dropFiles = ( files ) => mediaUpload( files, setAttributes );
+		const uploadFromFiles = ( event ) => mediaUpload( { filesList: event.target.files, setAttributes } );
+		const dropFiles = ( files ) => mediaUpload( { filesList: files, setAttributes } );
 
 		const editButtonLabel = __( 'Edit image' );
 		const controls = (

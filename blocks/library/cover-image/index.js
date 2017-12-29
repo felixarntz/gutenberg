@@ -95,7 +95,7 @@ registerBlockType( 'core/cover-image', {
 		const onSelectImage = ( media ) => setAttributes( { url: media.url, id: media.id } );
 		const toggleParallax = () => setAttributes( { hasParallax: ! hasParallax } );
 		const setDimRatio = ( ratio ) => setAttributes( { dimRatio: ratio } );
-		const dropFiles = ( files ) => mediaUpload( files, setAttributes );
+		const dropFiles = ( files ) => mediaUpload( { filesList: files, setAttributes } );
 		const style = url ?
 			{ backgroundImage: `url(${ url })` } :
 			undefined;

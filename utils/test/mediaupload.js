@@ -29,12 +29,12 @@ describe( 'mediaUpload', () => {
 	} );
 
 	it( 'should do nothing on no files', () => {
-		mediaUpload( [ ], setAttributesStub );
+		mediaUpload( { filesList: [ ], setAttributes: setAttributesStub } );
 		expect( console.error ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should do nothing on invalid image type', () => {
-		mediaUpload( [ invalidMediaObj ], setAttributesStub );
+		mediaUpload( { filesList: [ invalidMediaObj ], setAttributes: setAttributesStub } );
 		expect( console.error ).not.toHaveBeenCalled();
 	} );
 } );
