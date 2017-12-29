@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { noop } from 'lodash';
+import { get, noop } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -24,6 +24,7 @@ export function mediaUpload( {
 	setAttributes,
 	gallery = false,
 	onError = noop,
+	maxUploadFileSize = get( window, '_wpMediaSettings.maxUploadSize', 0 ),
 } ) {
 	// Cast filesList to array
 	const files = [ ...filesList ];
@@ -32,6 +33,16 @@ export function mediaUpload( {
 	files.forEach( ( mediaFile, idx ) => {
 		// Only allow image uploads, may need updating if used for video
 		if ( ! /^image\//.test( mediaFile.type ) ) {
+			return;
+		}
+
+		if ( maxUploadFileSize !== 0 && mediaFile.size > maxUploadFileSize ) {
+			onError(
+				sprintf(
+					__( '%s exceeds the maximum upload size for this site.' ),
+					mediaFile.name
+				)
+			);
 			return;
 		}
 
