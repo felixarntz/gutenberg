@@ -39,6 +39,7 @@ class GalleryBlock extends Component {
 	constructor() {
 		super( ...arguments );
 
+		this.createErrorNotice = this.createErrorNotice.bind( this );
 		this.onSelectImage = this.onSelectImage.bind( this );
 		this.onSelectImages = this.onSelectImages.bind( this );
 		this.setLinkTo = this.setLinkTo.bind( this );
@@ -94,11 +95,16 @@ class GalleryBlock extends Component {
 		this.props.setAttributes( { imageCrop: ! this.props.attributes.imageCrop } );
 	}
 
+	createErrorNotice( errorMsg ) {
+		this.props.createNotice( { status: 'error', content: errorMsg } );
+	}
+
 	uploadFromFiles( event ) {
 		mediaUpload( {
 			filesList: event.target.files,
 			setAttributes: this.props.setAttributes,
 			gallery: isGallery,
+			onError: this.createErrorNotice,
 		} );
 	}
 
@@ -128,6 +134,7 @@ class GalleryBlock extends Component {
 				} );
 			},
 			gallery: isGallery,
+			onError: this.createErrorNotice,
 		} );
 	}
 
