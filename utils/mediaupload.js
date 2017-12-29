@@ -1,3 +1,13 @@
+/**
+ * External dependencies
+ */
+import { noop } from 'lodash';
+
+/**
+ * WordPress dependencies
+ */
+import { __, sprintf } from '@wordpress/i18n';
+
 /* mediaupload.js
 	Media Upload is used by image and gallery blocks to handle uploading an image
 	when a file upload button is activated.
@@ -13,6 +23,7 @@ export function mediaUpload( {
 	filesList,
 	setAttributes,
 	gallery = false,
+	onError = noop,
 } ) {
 	// Cast filesList to array
 	const files = [ ...filesList ];
@@ -51,8 +62,8 @@ export function mediaUpload( {
 			},
 			() => {
 				// Reset to empty on failure.
-				// TODO: Better failure messaging
-				media.url = null;
+				media.id = undefined;
+				media.url = undefined;
 				if ( gallery ) {
 					setAttributes( { images: [
 						...gallerySet.slice( 0, idx ),
@@ -61,6 +72,12 @@ export function mediaUpload( {
 				} else {
 					setAttributes( media );
 				}
+				onError(
+					sprintf(
+						__( 'Error while uploading file %s to the media library.' ),
+						mediaFile.name
+					)
+				);
 			}
 		);
 	} );
