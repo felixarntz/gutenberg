@@ -8,11 +8,11 @@ import { noop } from 'lodash';
  */
 import Notice from './';
 
-function NoticeList( { notices, onRemove = noop } ) {
+function NoticeList( { notices, onRemove = noop, className = 'components-notice-list' } ) {
 	const removeNotice = ( id ) => () => onRemove( id );
 
 	return (
-		<div className="components-notice-list">
+		<div className={ className }>
 			{ [ ...notices ].reverse().map( ( notice ) => (
 				<Notice { ...notice } key={ notice.id } onRemove={ removeNotice( notice.id ) } />
 			) ) }
