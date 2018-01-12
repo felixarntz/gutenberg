@@ -1,3 +1,10 @@
+/**
+ * Browser dependencies
+ */
+const { userAgent } = window.navigator;
+
+const isMac = userAgent.indexOf( 'Mac' ) !== -1;
+
 export const BACKSPACE = 8;
 export const TAB = 9;
 export const ENTER = 13;
@@ -10,3 +17,15 @@ export const DOWN = 40;
 export const DELETE = 46;
 
 export const F10 = 121;
+
+export function isAccess( event, letter ) {
+	if ( isMac ) {
+		if ( ! event.ctrlKey || ! event.altKey ) {
+			return;
+		}
+	} else if ( ! event.shiftKey || ! event.altKey ) {
+		return;
+	}
+
+	return event.keyCode === letter.toUpperCase().charCodeAt(0);
+}

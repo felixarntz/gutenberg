@@ -69,8 +69,8 @@ export function createBlock( name, blockAttributes = {} ) {
  * @param  {Boolean}   isMultiBlock  Array of possible block transformations
  * @return {Function}                Predicate that receives a block type.
  */
-const isTransformForBlockSource = ( sourceName, isMultiBlock = false ) => ( transform ) => (
-	transform.type === 'block' &&
+const isTransformForBlockSource = ( sourceName, transformType, isMultiBlock = false ) => ( transform ) => (
+	transform.type === transformType &&
 	transform.blocks.indexOf( sourceName ) !== -1 &&
 	( ! isMultiBlock || transform.isMultiBlock )
 );
@@ -83,10 +83,10 @@ const isTransformForBlockSource = ( sourceName, isMultiBlock = false ) => ( tran
  * @param  {Boolean}   isMultiBlock  Array of possible block transformations
  * @return {Function}                Predicate that receives a block type.
  */
-const createIsTypeTransformableFrom = ( sourceName, isMultiBlock = false ) => ( type ) => (
+const createIsTypeTransformableFrom = ( sourceName, transformType, isMultiBlock = false ) => ( type ) => (
 	!! find(
 		get( type, 'transforms.from', [] ),
-		isTransformForBlockSource( sourceName, isMultiBlock ),
+		isTransformForBlockSource( sourceName, transformType, isMultiBlock ),
 	)
 );
 
@@ -111,7 +111,7 @@ export function getPossibleBlockTransformations( blocks ) {
 	//compute the block that have a from transformation able to transfer blocks passed as argument.
 	const blocksToBeTransformedFrom = filter(
 		getBlockTypes(),
-		createIsTypeTransformableFrom( sourceBlockName, isMultiBlock ),
+		createIsTypeTransformableFrom( sourceBlockName, 'block', isMultiBlock ),
 	).map( type => type.name );
 
 	const blockType = getBlockType( sourceBlockName );
@@ -134,6 +134,12 @@ export function getPossibleBlockTransformations( blocks ) {
 		}
 		return result;
 	}, [] );
+}
+
+export function getPossibleShortcutTransformations( block ) {
+	return getBlockTypes()
+		.reduce( ( acc, blockType ) => [ ...acc, ...get( blockType, 'transforms.from', [] ) ], [] )
+		.filter( isTransformForBlockSource( block.name, 'shortcut', false ) );
 }
 
 /**

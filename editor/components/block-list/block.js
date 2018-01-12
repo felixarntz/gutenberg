@@ -3,7 +3,7 @@
  */
 import { connect } from 'react-redux';
 import classnames from 'classnames';
-import { get, partial, reduce, size } from 'lodash';
+import { get, partial, reduce, size, find } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -16,6 +16,7 @@ import {
 	getBlockType,
 	getSaveElement,
 	isReusableBlock,
+	getPossibleShortcutTransformations,
 } from '@wordpress/blocks';
 import { withFilters, withContext } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
@@ -65,7 +66,7 @@ import {
 	getBlockMode,
 } from '../../store/selectors';
 
-const { BACKSPACE, ESCAPE, DELETE, ENTER, UP, RIGHT, DOWN, LEFT } = keycodes;
+const { BACKSPACE, ESCAPE, DELETE, ENTER, UP, RIGHT, DOWN, LEFT, isAccess } = keycodes;
 
 /**
  * Given a DOM node, finds the closest scrollable container node.
@@ -92,7 +93,7 @@ function getScrollContainer( node ) {
 }
 
 export class BlockListBlock extends Component {
-	constructor() {
+	constructor( { block } ) {
 		super( ...arguments );
 
 		this.setBlockListRef = this.setBlockListRef.bind( this );
@@ -112,6 +113,8 @@ export class BlockListBlock extends Component {
 
 		this.previousOffset = null;
 		this.hadTouchStart = false;
+
+		this.shortcutTransformations = getPossibleShortcutTransformations( block );
 
 		this.state = {
 			error: null,
@@ -298,6 +301,17 @@ export class BlockListBlock extends Component {
 
 	onKeyDown( event ) {
 		const { keyCode, target } = event;
+		const { block, onReplace } = this.props;
+
+		const transform = find( this.shortcutTransformations, ( { shortcut } ) => isAccess( event, shortcut ) );
+
+		if ( transform ) {
+			const newBlock = transform.transform( [ block.attributes ] );
+
+			onReplace( [ newBlock ] );
+
+			return;
+		}
 
 		switch ( keyCode ) {
 			case ENTER:
