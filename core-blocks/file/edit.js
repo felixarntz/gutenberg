@@ -30,7 +30,6 @@ import { compose } from '@wordpress/compose';
  */
 import './editor.scss';
 import FileBlockInspector from './inspector';
-import FileBlockEditableLink from './editable-link';
 
 class FileEdit extends Component {
 	constructor() {
@@ -44,12 +43,14 @@ class FileEdit extends Component {
 		this.changeShowDownloadButton = this.changeShowDownloadButton.bind( this );
 
 		this.state = {
+			hasError: false,
 			showCopyConfirmation: false,
 		};
 	}
 
 	componentDidMount() {
-		const { href } = this.props.attributes;
+		const { attributes, noticeOperations } = this.props;
+		const { href } = attributes;
 
 		// Upload a file drag-and-dropped into the editor
 		if ( this.isBlobURL( href ) ) {
@@ -59,6 +60,10 @@ class FileEdit extends Component {
 				allowedType: '*',
 				filesList: [ file ],
 				onFileChange: ( [ media ] ) => this.onSelectFile( media ),
+				onError: ( message ) => {
+					this.setState( { hasError: true } );
+					noticeOperations.createErrorNotice( message );
+				},
 			} );
 
 			revokeBlobURL( href );
@@ -74,6 +79,7 @@ class FileEdit extends Component {
 
 	onSelectFile( media ) {
 		if ( media && media.url ) {
+			this.setState( { hasError: false } );
 			this.props.setAttributes( {
 				href: media.url,
 				fileName: media.title,
@@ -129,14 +135,10 @@ class FileEdit extends Component {
 			downloadButtonText,
 			id,
 		} = attributes;
-		const { showCopyConfirmation } = this.state;
+		const { hasError, showCopyConfirmation } = this.state;
 		const attachmentPage = media && media.link;
 
-		const classes = classnames( className, {
-			'is-transient': this.isBlobURL( href ),
-		} );
-
-		if ( ! href ) {
+		if ( ! href || hasError ) {
 			return (
 				<MediaPlaceholder
 					icon="media-default"
@@ -152,6 +154,10 @@ class FileEdit extends Component {
 				/>
 			);
 		}
+
+		const classes = classnames( className, {
+			'is-transient': this.isBlobURL( href ),
+		} );
 
 		return (
 			<Fragment>
@@ -184,12 +190,16 @@ class FileEdit extends Component {
 				</BlockControls>
 				<div className={ classes }>
 					<div>
-						<FileBlockEditableLink
-							className={ className }
+						<RichText
+							wrapperClassName={ `${ className }__textlink` }
+							tagName="div" // must be block-level or else cursor disappears
+							format="string"
+							value={ fileName }
+							multiline="false"
 							placeholder={ __( 'Write file name…' ) }
-							text={ fileName }
-							href={ textLinkHref }
-							updateFileName={ ( text ) => setAttributes( { fileName: text } ) }
+							keepPlaceholderOnFocus
+							formattingControls={ [] } // disable controls
+							onChange={ ( text ) => setAttributes( { fileName: text } ) }
 						/>
 						{ showDownloadButton &&
 							<div className={ `${ className }__button-richtext-wrapper` }>

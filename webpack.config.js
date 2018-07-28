@@ -4,6 +4,8 @@
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 const LiveReloadPlugin = require( 'webpack-livereload-plugin' );
+const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const postcss = require( 'postcss' );
 
 const { get } = require( 'lodash' );
 const { basename } = require( 'path' );
@@ -75,11 +77,9 @@ function camelCaseDash( string ) {
 
 const entryPointNames = [
 	'components',
-	'editor',
 	'utils',
 	'edit-post',
 	'core-blocks',
-	'nux',
 ];
 
 const gutenbergPackages = [
@@ -96,15 +96,19 @@ const gutenbergPackages = [
 	'deprecated',
 	'dom',
 	'dom-ready',
+	'editor',
 	'element',
 	'hooks',
 	'html-entities',
 	'i18n',
 	'is-shallow-equal',
 	'keycodes',
+	'nux',
 	'plugins',
 	'shortcode',
+	'url',
 	'viewport',
+	'wordcount',
 ];
 
 const externals = {
@@ -163,6 +167,7 @@ const config = {
 				test: /\.js$/,
 				exclude: [
 					/block-serialization-spec-parser/,
+					/is-shallow-equal/,
 					/node_modules/,
 				],
 				use: 'babel-loader',
@@ -233,8 +238,26 @@ const config = {
 			'api-fetch',
 			'deprecated',
 			'dom-ready',
-			'is-shallow-equal',
 		].map( camelCaseDash ) ),
+		new CopyWebpackPlugin(
+			gutenbergPackages.map( ( packageName ) => ( {
+				from: `./packages/${ packageName }/build-style/*.css`,
+				to: `./build/${ packageName }/`,
+				flatten: true,
+				transform: ( content ) => {
+					if ( config.mode === 'production' ) {
+						return postcss( [
+							require( 'cssnano' )( {
+								preset: 'default',
+							} ),
+						] )
+							.process( content, { from: 'src/app.css', to: 'dest/app.css' } )
+							.then( ( result ) => result.css );
+					}
+					return content;
+				},
+			} ) )
+		),
 	],
 	stats: {
 		children: false,

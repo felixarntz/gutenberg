@@ -16,7 +16,7 @@ import { ENTER, ESCAPE, UP, DOWN, SPACE } from '@wordpress/keycodes';
  */
 import EnhancedAutocomplete, { Autocomplete } from '../';
 
-jest.useFakeTimers();
+jest.mock( '../../button' );
 
 class FakeEditor extends Component {
 	// we want to change the editor contents manually so don't let react update it
@@ -723,7 +723,7 @@ describe( 'Autocomplete', () => {
 			} );
 		} );
 
-		it( 'doesn\'t otherwise interfere with keydown behavior', ( done ) => {
+		it( "doesn't otherwise interfere with keydown behavior", ( done ) => {
 			const wrapper = makeAutocompleter( [ slashCompleter ] );
 			// listen to keydown events on the editor to see if it gets them
 			const editorKeydown = jest.fn();
